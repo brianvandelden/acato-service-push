@@ -1,0 +1,18 @@
+{
+  "name": "acato-service-push",
+  "version": "1.0.2",
+  "homepage": "https://github.com/brianvandelden/acato-service-push",
+  "authors": [
+    "Brian van Delden <brian@acato.nl>"
+  ],
+  "description": "Acato push package for Ionic projects",
+  "main": "acato-push.js",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "license": "MIT"
+}
