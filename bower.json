@@ -7,6 +7,9 @@
   ],
   "description": "Acato push package for Ionic projects",
   "main": "acato-push.js",
+  "dependencies": {
+    "acato-service-core": "latest"
+  },
   "ignore": [
     "**/.*",
     "node_modules",
