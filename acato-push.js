@@ -2,10 +2,10 @@ angular.module('acato.service.push', [])
 
 
 /**
- * Acato pusher
+ * Acato pusherHandler
  *
  */
-    .factory('pusher', function ($q, $window) {
+    .factory('$acatoPusherHandler', function ($q, $window) {
         return {
             registerPush: function (pushConfig) {
                 var deferred = $q.defer();
@@ -54,53 +54,21 @@ angular.module('acato.service.push', [])
 
 
 /**
- * Acato pusherHandler
+ * Acato pusher
  *
  */
-    .factory('pusherHandler', function ($rootScope,
+    .factory('$acatoPusher', function ($rootScope,
                                         $q,
-                                        pusher,
+                                        $acatoPusherHandler,
                                         localStorageService,
-                                        $http,
                                         $window,
                                         $acatoApp) {
-        function registerId(id, os) {
-            var deferred = $q.defer();
-
-            $http.post($acatoApp.getApiEndpoint('pushregistrations'), {regid: id, os: os}).
-                success(function (result) {
-                    localStorageService.set('regid', result.regid);
-                    deferred.resolve(result);
-                }).
-                error(function (error) {
-                    deferred.reject(error);
-                });
-            return deferred.promise;
-        }
-
-        function unregisterId() {
-            var deferred = $q.defer();
-
-            var regId = localStorageService.get('regid');
-            if (regId && regId.length > 0) {
-                $http.get($acatoApp.getApiEndpoint('pushregistrations)' + regId).
-                    success(function (result) {
-                        localStorageService.remove('regid');
-                        deferred.resolve();
-                    }).
-                    error(function (error) {
-                        deferred.reject();
-                    }));
-            } else {
-                deferred.resolve();
-            }
-            return deferred.promise;
-        }
 
         $window.onNotificationAPN = function (e) {
             if (e.payload) {
-                $rootScope.$emit('$acatoPush:received', {
-                    message: e.payload
+                $rootScope.$emit('$acatoPusher:received', {
+                    message: e.payload,
+                    platform: 'ios'
                 });
             }
         };
@@ -111,16 +79,18 @@ angular.module('acato.service.push', [])
             switch (e.event) {
                 case 'registered':
                     if (e.regid.length > 0) {
-                        registerId(e.regid, 'android').then(function () {
-                        }, function (error) {
-                            console.log(error, 'error');
+
+                        $rootScope.$emit('$acatoPusher:registered', {
+                            token: e.regid,
+                            platform: 'android'
                         });
                     }
                     break;
 
                 case 'message':
-                    $rootScope.$emit('$acatoPush:received', {
-                        message: e.payload
+                    $rootScope.$emit('$acatoPusher:received', {
+                        message: e.payload,
+                        platform: 'android'
                     });
                     break;
 
@@ -146,7 +116,7 @@ angular.module('acato.service.push', [])
                     'ecb': 'onNotificationGCM'
                 };
 
-                pusher.registerPush(pushConfig).then(function (result) {
+                $acatoPusher.registerPush(pushConfig).then(function (result) {
                     // success
                     // waiting... GCM callback will do the real work here.
                     deferred.resolve(result);
@@ -161,15 +131,16 @@ angular.module('acato.service.push', [])
                     'alert': 'true',
                     'ecb': 'onNotificationAPN'
                 };
-                pusher.registerPush(pushConfig).then(function (token) {
-                    registerId(token, 'ios').then(function (result) {
-                        deferred.resolve(result);
-                    }, function (error) {
-                        // @NICETOHAVE restoreConfig
-                        deferred.reject(error);
+                $acatoPusher.registerPush(pushConfig).then(function (token) {
+
+                    $rootScope.$emit('$acatoPusher:registered', {
+                        token: token,
+                        platform: 'ios'
                     });
+
+                    deferred.resolve(token);
+
                 }, function (error) {
-                    // restore previous config
                     deferred.reject(error);
                 });
             }
@@ -181,17 +152,9 @@ angular.module('acato.service.push', [])
 
             var deferred = $q.defer();
 
-            pusher.unregisterPush().then(function () {
-                unregisterId().then(function (result) {
-                    // success
-                    deferred.resolve(result);
-                }, function (error) {
-                    // @NICETOHAVE restoreConfig
-                    deferred.reject(error);
-                });
-
+            $acatoPusher.unregisterPush().then(function (result) {
+                deferred.resolve(result);
             }, function (error) {
-                // @NICETOHAVE restoreConfig
                 deferred.reject(error);
             });
 
@@ -200,8 +163,6 @@ angular.module('acato.service.push', [])
 
         return {
             registerPush: registerPush,
-            unregisterPush: unregisterPush,
-            registerId: registerId,
-            unregisterId: unregisterId
+            unregisterPush: unregisterPush
         };
     });
