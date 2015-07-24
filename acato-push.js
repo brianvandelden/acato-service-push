@@ -66,7 +66,8 @@ angular.module('acato.service.push', [])
 
         $window.onNotificationAPN = function (e) {
             if (e.payload) {
-                $rootScope.$emit('$acatoPusher:received', {
+
+                $rootScope.$emit('$acatoPusher:messageReceived', {
                     message: e.payload,
                     platform: 'ios'
                 });
@@ -88,7 +89,7 @@ angular.module('acato.service.push', [])
                     break;
 
                 case 'message':
-                    $rootScope.$emit('$acatoPusher:received', {
+                    $rootScope.$emit('$acatoPusher:messageReceived', {
                         message: e.payload,
                         platform: 'android'
                     });
