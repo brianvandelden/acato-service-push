@@ -117,7 +117,7 @@ angular.module('acato.service.push', [])
                     'ecb': 'onNotificationGCM'
                 };
 
-                $acatoPusher.registerPush(pushConfig).then(function (result) {
+                $acatoPusherHandler.registerPush(pushConfig).then(function (result) {
                     // success
                     // waiting... GCM callback will do the real work here.
                     deferred.resolve(result);
@@ -132,7 +132,7 @@ angular.module('acato.service.push', [])
                     'alert': 'true',
                     'ecb': 'onNotificationAPN'
                 };
-                $acatoPusher.registerPush(pushConfig).then(function (token) {
+                $acatoPusherHandler.registerPush(pushConfig).then(function (token) {
 
                     $rootScope.$emit('$acatoPusher:registered', {
                         token: token,
@@ -153,7 +153,7 @@ angular.module('acato.service.push', [])
 
             var deferred = $q.defer();
 
-            $acatoPusher.unregisterPush().then(function (result) {
+            $acatoPusherHandler.unregisterPush().then(function (result) {
                 deferred.resolve(result);
             }, function (error) {
                 deferred.reject(error);
