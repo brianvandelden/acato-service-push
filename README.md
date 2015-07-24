@@ -1,7 +1,27 @@
 # acato-service-push
 
-cordova plugin add https://github.com/phonegap-build/PushPlugin.git
-
 Register push for iOS / Android
 
-Dependency: https://github.com/brianvandelden/acato-service-core
+Dependencies: 
+cordova plugin add https://github.com/phonegap-build/PushPlugin.git
+
+## Implementation
+```
+$rootScope.$on('$acatoPusher:messageReceived', function(event) {
+    alert(JSON.stringify(event));
+    console.log(event.platform, 'platform');
+});
+
+$rootScope.$on('$acatoPusher:registered', function(event) {
+    alert(JSON.stringify(event));
+    console.log(event.platform, 'platform');
+});
+
+$scope.registerPush = function () {
+    $acatoPusher.registerPush().then(function(results) {
+        // loop true results
+    }, function(error) {
+        alert(error);
+    });
+};
+```
